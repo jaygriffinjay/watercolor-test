@@ -1,6 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { EnhancedWatercolorDivider } from './EnhancedWatercolorDivider';
+import { WatercolorBorder } from './WatercolorBorder';
+import { WatercolorBorderImage } from './WatercolorBorderImage';
+import { WatercolorButton } from './WatercolorButton';
+import { WatercolorPNGButton } from './WatercolorPNGButton';
+import { rasterizeSVG, downloadPNG } from '../utils/rasterizeSVG';
+import { 
+  WatercolorButtonBlueSmall,
+  WatercolorButtonBlueMedium,
+  WatercolorButtonBlueLarge,
+  WatercolorButtonPurpleSmall,
+  WatercolorButtonPurpleMedium,
+  WatercolorButtonGreenMedium
+} from './generated';
 
 const PlaygroundContainer = styled.div`
   padding: 2rem;
@@ -95,6 +108,29 @@ const ColorPalette = styled.div`
   margin-top: 0.5rem;
 `;
 
+const ExportButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  background: #059669;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 1rem;
+  
+  &:hover {
+    background: #047857;
+  }
+`;
+
+const ExportSection = styled.div`
+  background: #f0fdf4;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border: 1px solid #bbf7d0;
+`;
+
 export const WatercolorPlayground: React.FC = () => {
   const [width, setWidth] = useState(800);
   const [height, setHeight] = useState(4);
@@ -103,6 +139,9 @@ export const WatercolorPlayground: React.FC = () => {
   const [animated, setAnimated] = useState(false);
   const [hoverable, setHoverable] = useState(false);
   const [seed, setSeed] = useState(1234);
+  const [borderFrame, setBorderFrame] = useState(false);
+  
+  const svgRef = useRef<HTMLDivElement>(null);
   
   const colors = [
     '#2563eb', // Blue
@@ -119,6 +158,41 @@ export const WatercolorPlayground: React.FC = () => {
     setSeed(Math.floor(Math.random() * 10000));
   };
   
+  const exportSVG = () => {
+    if (svgRef.current) {
+      const svgElement = svgRef.current.querySelector('svg');
+      if (svgElement) {
+        const svgData = svgElement.outerHTML;
+        const blob = new Blob([svgData], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `watercolor-${width}x${height}-${color.slice(1)}-${intensity}-seed${seed}.svg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    }
+  };
+  
+  const rasterizeButton = async () => {
+    if (svgRef.current) {
+      const svgElement = svgRef.current.querySelector('svg');
+      if (svgElement) {
+        try {
+          const svgString = svgElement.outerHTML;
+          const dataURL = await rasterizeSVG(svgString, width, height, 3); // 3x scale
+          downloadPNG(dataURL, `watercolor-button-${width}x${height}-${color.slice(1)}-rasterized.png`);
+        } catch (error) {
+          console.error('Rasterization failed:', error);
+          alert('Failed to rasterize SVG. Check console for details.');
+        }
+      }
+    }
+  };
+
   return (
     <PlaygroundContainer>
       <h1 style={{ fontFamily: 'Kalam, cursive', textAlign: 'center', marginBottom: '3rem' }}>
@@ -132,7 +206,7 @@ export const WatercolorPlayground: React.FC = () => {
             <Label>Width: {width}px</Label>
             <Input 
               type="range" 
-              min="200" 
+              min="1" 
               max="1000" 
               value={width} 
               onChange={e => setWidth(Number(e.target.value))} 
@@ -144,7 +218,7 @@ export const WatercolorPlayground: React.FC = () => {
             <Input 
               type="range" 
               min="2" 
-              max="20" 
+              max="200" 
               value={height} 
               onChange={e => setHeight(Number(e.target.value))} 
             />
@@ -179,7 +253,24 @@ export const WatercolorPlayground: React.FC = () => {
                 onChange={e => setHoverable(e.target.checked)} 
               /> Hoverable
             </Label>
+            <Label>
+              <input 
+                type="checkbox" 
+                checked={borderFrame} 
+                onChange={e => setBorderFrame(e.target.checked)} 
+              /> Border Frame Mode
+            </Label>
           </ControlGroup>
+          
+          <div>
+            <button onClick={exportSVG}>
+              Export SVG
+            </button>
+            
+            <button onClick={rasterizeButton}>
+              Rasterize PNG
+            </button>
+          </div>
         </Controls>
         
         <ControlGroup>
@@ -196,19 +287,243 @@ export const WatercolorPlayground: React.FC = () => {
           </ColorPalette>
         </ControlGroup>
         
-        <EnhancedWatercolorDivider
-          width={width}
-          height={height}
-          color={color}
-          intensity={intensity}
-          animated={animated}
-          hoverable={hoverable}
-          seed={seed}
-        />
+        <div ref={svgRef}>
+          <EnhancedWatercolorDivider
+            width={width}
+            height={height}
+            color={color}
+            intensity={intensity}
+            animated={animated}
+            hoverable={hoverable}
+            seed={seed}
+            borderFrame={borderFrame}
+          />
+        </div>
+        
+        <ExportSection>
+          <h4 style={{ margin: '0 0 0.5rem 0', color: '#065f46' }}>🔽 Export Current Design</h4>
+          <p style={{ margin: '0 0 1rem 0', fontSize: '14px', color: '#047857' }}>
+            Download the current watercolor design as an SVG file for use with CSS border-image or other projects.
+          </p>
+          <ExportButton onClick={exportSVG}>
+            Download SVG ({width}×{height})
+          </ExportButton>
+        </ExportSection>
       </Section>
       
       <Section>
-        <SectionTitle>Usage Examples</SectionTitle>
+        <SectionTitle>Watercolor Borders (New!)</SectionTitle>
+        
+        <DemoGrid>
+          <div>
+            <h3>Simple Button Border</h3>
+            <WatercolorBorder 
+              width={120} 
+              height={40}
+              borderThickness={3}
+              color="#7c3aed"
+              intensity="medium"
+            >
+              <button style={{
+                width: '100%',
+                height: '100%',
+                background: '#f8fafc',
+                border: 'none',
+                borderRadius: '4px',
+                fontFamily: 'Nunito, sans-serif',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}>
+                Click Me
+              </button>
+            </WatercolorBorder>
+          </div>
+          
+          <div>
+            <h3>Animated Border Card</h3>
+            <WatercolorBorder 
+              width={200} 
+              height={100}
+              borderThickness={2}
+              color="#059669"
+              intensity="heavy"
+              animated={true}
+            >
+              <div style={{
+                width: '100%',
+                height: '100%',
+                background: '#ffffff',
+                padding: '1rem',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Nunito, sans-serif'
+              }}>
+                Card Content
+              </div>
+            </WatercolorBorder>
+          </div>
+          
+          <div>
+            <h3>Thick Orange Border</h3>
+            <WatercolorBorder 
+              width={80} 
+              height={80}
+              borderThickness={6}
+              color="#ea580c"
+              intensity="heavy"
+            >
+              <div style={{
+                width: '100%',
+                height: '100%',
+                background: '#fef3c7',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Kalam, cursive',
+                fontSize: '24px'
+              }}>
+                🎨
+              </div>
+            </WatercolorBorder>
+          </div>
+          
+          <div>
+            <h3>Thin Accent Border</h3>
+            <WatercolorBorder 
+              width={160} 
+              height={30}
+              borderThickness={1}
+              color="#0891b2"
+              intensity="light"
+            >
+              <div style={{
+                width: '100%',
+                height: '100%',
+                background: '#f0f9ff',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Nunito, sans-serif',
+                fontSize: '12px',
+                color: '#0369a1'
+              }}>
+                Subtle Border
+              </div>
+            </WatercolorBorder>
+          </div>
+        </DemoGrid>
+      </Section>
+      
+      <Section>
+        <SectionTitle>CSS Border-Image (Experimental!)</SectionTitle>
+        <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+          Testing watercolor borders using CSS border-image with exported SVG assets.
+        </p>
+        
+        <DemoGrid>
+          <div>
+            <h3>Stretch Mode</h3>
+            <WatercolorBorderImage
+              borderWidth={15}
+              borderSlice={33}
+              borderImageMode="stretch"
+              svgPath="/src/assets/watercolor-border-v2.svg"
+              width={150}
+              height={100}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Nunito, sans-serif',
+                height: '100%'
+              }}>
+                Stretch Border
+              </div>
+            </WatercolorBorderImage>
+          </div>
+          
+          <div>
+            <h3>Repeat Mode</h3>
+            <WatercolorBorderImage
+              borderWidth={12}
+              borderSlice={25}
+              borderImageMode="repeat"
+              svgPath="/src/assets/watercolor-border-v2.svg"
+              width={180}
+              height={80}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Nunito, sans-serif',
+                height: '100%'
+              }}>
+                Repeat Border
+              </div>
+            </WatercolorBorderImage>
+          </div>
+          
+          <div>
+            <h3>Round Mode</h3>
+            <WatercolorBorderImage
+              borderWidth={20}
+              borderSlice={40}
+              borderImageMode="round"
+              svgPath="/src/assets/watercolor-border-v2.svg"
+              width={120}
+              height={120}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Kalam, cursive',
+                fontSize: '18px',
+                height: '100%'
+              }}>
+                🎨
+              </div>
+            </WatercolorBorderImage>
+          </div>
+          
+          <div>
+            <h3>Thick Border</h3>
+            <WatercolorBorderImage
+              borderWidth={25}
+              borderSlice={50}
+              borderImageMode="stretch"
+              svgPath="/src/assets/watercolor-border-v2.svg"
+              width={100}
+              height={60}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Nunito, sans-serif',
+                fontSize: '12px',
+                height: '100%'
+              }}>
+                Thick
+              </div>
+            </WatercolorBorderImage>
+          </div>
+        </DemoGrid>
+        
+        <div style={{ marginTop: '1rem', padding: '1rem', background: '#fef3c7', borderRadius: '6px' }}>
+          <strong>Note:</strong> Update the <code>svgPath</code> prop to match your exported SVG filename. 
+          Try different <code>borderSlice</code> values (10-50) to see how the border gets divided!
+        </div>
+      </Section>
+      
+      <Section>
+        <SectionTitle>Watercolor Borders (New!)</SectionTitle>
         
         <DemoGrid>
           <div>
@@ -269,6 +584,68 @@ export const WatercolorPlayground: React.FC = () => {
 />`}
         </pre>
       </Section>
+      
+      <Section>
+        <SectionTitle>🖼️ PNG Button (Using Rasterized Assets)</SectionTitle>
+        <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+          Buttons using pre-rasterized PNG files. Perfect for when you want consistent, high-quality watercolor buttons without any runtime rendering!
+        </p>
+        
+        <DemoGrid>
+          <div>
+            <h3>Your Exported Button</h3>
+            <WatercolorPNGButton
+              pngPath="/src/assets/watercolor-button-50x50-2563eb-rasterized.png"
+              width={50}
+              height={50}
+              onClick={() => alert('PNG Button clicked!')}
+            >
+              🎨
+            </WatercolorPNGButton>
+            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '0.5rem' }}>
+              Using: watercolor-button-50x50-2563eb-rasterized.png
+            </p>
+          </div>
+          
+          <div>
+            <h3>Scaled Up Version</h3>
+            <WatercolorPNGButton
+              pngPath="/src/assets/watercolor-button-50x50-2563eb-rasterized.png"
+              width={100}
+              height={100}
+              onClick={() => alert('Scaled PNG Button!')}
+            >
+              Click Me
+            </WatercolorPNGButton>
+            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '0.5rem' }}>
+              Same PNG, scaled to 100x100
+            </p>
+          </div>
+          
+          <div>
+            <h3>Disabled State</h3>
+            <WatercolorPNGButton
+              pngPath="/src/assets/watercolor-button-50x50-2563eb-rasterized.png"
+              width={80}
+              height={40}
+              disabled={true}
+            >
+              Disabled
+            </WatercolorPNGButton>
+            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '0.5rem' }}>
+              Disabled button state
+            </p>
+          </div>
+        </DemoGrid>
+        
+        <div style={{ marginTop: '1rem', padding: '1rem', background: '#ecfdf5', borderRadius: '6px' }}>
+          <strong>💡 Pro Tip:</strong> Export multiple sizes and colors as PNGs, then use them throughout your app for zero-runtime cost!
+          <br />
+          <code style={{ background: '#d1fae5', padding: '2px 4px', borderRadius: '2px', fontSize: '12px' }}>
+            &lt;WatercolorPNGButton pngPath="/assets/button.png" width=&#123;120&#125; height=&#123;40&#125;&gt;
+          </code>
+        </div>
+      </Section>
     </PlaygroundContainer>
   );
-}; 
+};

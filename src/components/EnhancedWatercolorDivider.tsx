@@ -11,6 +11,7 @@ interface WatercolorDividerProps {
   seed?: number;
   className?: string;
   onClick?: () => void;
+  borderFrame?: boolean;
 }
 
 const Container = styled.div<{ hoverable?: boolean }>`
@@ -73,7 +74,8 @@ export const EnhancedWatercolorDivider: React.FC<WatercolorDividerProps> = ({
   hoverable = false,
   seed: initialSeed = 1234,
   className,
-  onClick
+  onClick,
+  borderFrame = false
 }) => {
   const [seed, setSeed] = useState(initialSeed);
   const [animationSeed, setAnimationSeed] = useState(initialSeed);
@@ -150,9 +152,11 @@ export const EnhancedWatercolorDivider: React.FC<WatercolorDividerProps> = ({
           y="0" 
           width={width} 
           height={height} 
-          rx={height/2} 
-          fill={color} 
-          fillOpacity="0.3" 
+          rx={height <= 10 ? height/2 : Math.min(4, height * 0.1)} 
+          fill={borderFrame ? 'none' : color}
+          stroke={borderFrame ? color : 'none'}
+          strokeWidth={borderFrame ? Math.min(width, height) * 0.15 : 0}
+          fillOpacity={borderFrame ? 0 : 0.3}
           filter={`url(#${filterId})`} 
         />
       </svg>

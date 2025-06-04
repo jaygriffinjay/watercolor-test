@@ -11,6 +11,8 @@ The playground lets you experiment with watercolor effects in real-time:
 - 🌊 **Animation effects** - Watch watercolor flow and change dynamically
 - 🖱️ **Interactive hover effects** - Components that respond to user interaction
 - 📋 **Live code examples** - See exactly how to implement each configuration
+- 🖼️ **PNG Export** - Rasterize watercolor effects to high-resolution PNG assets
+- ⚡ **Live PNG Buttons** - Test PNG-based buttons directly in the playground
 
 ## 🏗️ Architecture Overview
 
@@ -28,13 +30,19 @@ This project offers **multiple approaches** to watercolor effects, each optimize
 - **Performance**: Zero runtime computation - everything pre-rendered
 - **Usage**: Static designs, consistent branding, performance-critical apps
 
-### 3. 🖼️ Static PNG Components (`StaticWatercolorDivider`)
+### 3. 🖼️ PNG Button Components (`WatercolorPNGButton`) **NEW!**
+- **Best for**: Ultra-high performance with pixel-perfect consistency
+- **Features**: Pre-rasterized PNG assets with interactive button behavior
+- **Performance**: Fastest possible - just image rendering with CSS effects
+- **Usage**: Production buttons, mobile apps, high-traffic sites
+
+### 4. 🎨 CSS PNG Components (`StaticWatercolorDivider`)
 - **Best for**: Maximum performance with simple color variations
 - **Features**: CSS-only color transformations on exported PNG assets
-- **Performance**: Fastest possible - just image rendering
+- **Performance**: Fast image rendering with CSS filters
 - **Usage**: High-traffic sites, mobile apps, simple color schemes
 
-### 4. 🎨 Classic Watercolor Suite
+### 5. 🎨 Classic Watercolor Suite
 - **Components**: `WatercolorButton`, `WatercolorCard`, `WatercolorNavigation`
 - **Features**: Traditional component library with configurable props
 - **Usage**: Complete UI systems, design consistency
@@ -50,24 +58,52 @@ src/
 │   │   └── ... (7 more themes)
 │   ├── EnhancedWatercolorDivider.tsx    # Dynamic playground component
 │   ├── WatercolorPlayground.tsx         # Interactive demo interface
-│   ├── WatercolorButton.tsx             # Button components
+│   ├── WatercolorPNGButton.tsx          # PNG asset-based buttons (NEW!)
+│   ├── WatercolorBorder.tsx             # Watercolor border wrapper
+│   ├── WatercolorBorderImage.tsx        # CSS border-image implementation
+│   ├── WatercolorButton.tsx             # Dynamic button components
 │   ├── WatercolorCard.tsx               # Card components
 │   ├── WatercolorNavigation.tsx         # Navigation components
 │   ├── StaticWatercolorDivider.tsx      # PNG-based component
 │   └── SVGWatercolorDivider.tsx         # Programmatic SVG generator
 ├── utils/
 │   ├── watercolorFactory.ts             # Build-time generation system
+│   ├── rasterizeSVG.ts                  # Browser-based PNG export (NEW!)
 │   └── exportWatercolorAsset.ts         # PNG export utilities
 ├── scripts/
 │   └── generateWatercolorComponents.js  # Build script for themed components
 └── assets/
     ├── paper-texture.webp               # Texture overlay
-    └── purple line watercolor complete.png  # Exported watercolor asset
+    ├── watercolor-button-50x50-2563eb-rasterized.png  # Example PNG asset
+    └── purple line watercolor complete.png            # Exported watercolor asset
 ```
 
 ## 🚀 Quick Start
 
-### Basic Usage
+### PNG Button Workflow (Recommended for Production)
+
+```tsx
+// 1. Export PNG from playground
+// Use the "Rasterize PNG" button to export high-res assets
+
+// 2. Use the PNG button component
+import { WatercolorPNGButton } from './components/WatercolorPNGButton';
+
+function App() {
+  return (
+    <WatercolorPNGButton
+      pngPath="/assets/watercolor-button-100x40-blue.png"
+      width={100}
+      height={40}
+      onClick={() => alert('Clicked!')}
+    >
+      Click Me
+    </WatercolorPNGButton>
+  );
+}
+```
+
+### Dynamic Components
 
 ```tsx
 import { EnhancedWatercolorDivider } from './components/EnhancedWatercolorDivider';
@@ -127,6 +163,18 @@ This creates new pre-rendered components in `src/components/generated/` with var
 
 ## 🎯 Component Props
 
+### WatercolorPNGButton (NEW!)
+```tsx
+interface WatercolorPNGButtonProps {
+  pngPath: string;          // Path to PNG asset
+  width: number;            // Button width in pixels
+  height: number;           // Button height in pixels
+  children: React.ReactNode; // Button content
+  onClick?: () => void;     // Click handler
+  disabled?: boolean;       // Disabled state (default: false)
+}
+```
+
 ### EnhancedWatercolorDivider
 ```tsx
 interface WatercolorDividerProps {
@@ -151,10 +199,24 @@ The watercolor effect uses a sophisticated SVG filter pipeline:
 - **feGaussianBlur**: Softens edges for paint-like bleeding
 - **feComposite**: Blends multiple layers for depth
 
-### Performance Optimization
-- **Build-time generation**: Pre-render complex filters to avoid runtime computation
-- **Static assets**: Export to PNG for maximum performance
-- **Opacity tuning**: 30% fill opacity minimizes rectangular artifacts while preserving effects
+### PNG Rasterization Workflow (NEW!)
+The project now includes a complete workflow for creating production-ready PNG button assets:
+
+1. **Design in Playground** - Use the interactive controls to perfect your watercolor design
+2. **Export High-Resolution PNG** - Click "Rasterize PNG" to generate 3x resolution assets
+3. **Use PNG Button Component** - Implement with `WatercolorPNGButton` for maximum performance
+
+#### Rasterization Features:
+- **Browser-based Processing** - No server dependencies, uses Canvas API
+- **High Resolution** - 3x scaling ensures crisp rendering at any size
+- **Instant Download** - Direct file download with descriptive naming
+- **Quality Optimization** - Maintains watercolor authenticity in rasterized form
+
+#### Performance Benefits:
+- **Zero Runtime Cost** - PNG rendering is faster than SVG filters
+- **Consistent Appearance** - Identical button every time, no variation
+- **Mobile Optimized** - Excellent performance on mobile devices
+- **Scalable** - Single PNG can be used at multiple sizes
 
 ## 🌟 Navigation
 
@@ -177,3 +239,7 @@ MIT License - Use freely in your projects!
 ---
 
 🎨 **Happy watercoloring!** Try the playground to see what beautiful effects you can create.
+
+## 📋 What's New?
+
+See [CHANGELOG.md](./CHANGELOG.md) for detailed information about recent updates, new features, and the evolution of this project.

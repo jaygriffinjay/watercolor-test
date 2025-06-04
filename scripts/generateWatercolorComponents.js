@@ -152,6 +152,98 @@ export const ${componentName}: React.FC<{ className?: string }> = ({ className }
 `;
 };
 
+// Generate Button React component code
+const generateButtonComponentCode = (componentName, lightSVG, darkSVG, width, height) => {
+  return `import React from 'react';
+import styled from 'styled-components';
+
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+const ButtonContainer = styled.div<{ disabled: boolean }>\`
+  display: inline-block;
+  width: ${width}px;
+  height: ${height}px;
+  cursor: \${props => props.disabled ? 'not-allowed' : 'pointer'};
+  opacity: \${props => props.disabled ? 0.6 : 1};
+  transition: transform 0.2s ease;
+  position: relative;
+  
+  &:hover {
+    transform: \${props => props.disabled ? 'none' : 'scale(1.02)'};
+  }
+  
+  &:active {
+    transform: \${props => props.disabled ? 'none' : 'scale(0.98)'};
+  }
+  
+  .dark-svg {
+    display: none;
+  }
+  
+  /* Dark mode via class */
+  .dark-mode & {
+    .light-svg { display: none; }
+    .dark-svg { display: block; }
+  }
+  
+  /* Dark mode via media query */
+  @media (prefers-color-scheme: dark) {
+    .light-svg { display: none; }
+    .dark-svg { display: block; }
+  }
+  
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+\`;
+
+const ButtonContent = styled.div\`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  z-index: 2;
+  pointer-events: none;
+\`;
+
+export const ${componentName}: React.FC<ButtonProps> = ({ children, onClick, disabled = false, className }) => (
+  <ButtonContainer 
+    disabled={disabled}
+    onClick={disabled ? undefined : onClick}
+    className={className}
+  >
+    <div className="light-svg">
+      ${lightSVG.replace(/\s+/g, ' ').trim()}
+    </div>
+    <div className="dark-svg">
+      ${darkSVG.replace(/\s+/g, ' ').trim()}
+    </div>
+    <ButtonContent>
+      {children}
+    </ButtonContent>
+  </ButtonContainer>
+);
+`;
+};
+
 // Generate index file for all components
 const generateIndexFile = (componentNames) => {
   const exports = componentNames.map(name => `export { ${name} } from './${name}';`).join('\n');
@@ -201,9 +293,51 @@ const generateAllComponents = () => {
     
     const componentCode = generateComponentCode(componentName, lightSVG, darkSVG);
     const filePath = path.join(outputDir, `${componentName}.tsx`);
-    
     fs.writeFileSync(filePath, componentCode);
     console.log(`✅ Generated: ${componentName}.tsx`);
+  });
+  
+  // Generate button components for select themes and sizes
+  const buttonSizes = [
+    { name: 'Small', width: 100, height: 32 },
+    { name: 'Medium', width: 120, height: 40 },
+    { name: 'Large', width: 160, height: 50 }
+  ];
+  
+  const buttonThemes = ['Blue', 'Purple', 'Green']; // Just a few to test
+  
+  buttonThemes.forEach(themeName => {
+    const theme = watercolorThemes.find(t => t.name === themeName);
+    
+    buttonSizes.forEach(size => {
+      console.log(`🔘 Generating ${theme.name} ${size.name} button...`);
+      
+      const componentName = `WatercolorButton${theme.name}${size.name}`;
+      componentNames.push(componentName);
+      
+      const lightSVG = generateWatercolorSVG({
+        width: size.width,
+        height: size.height,
+        color: theme.lightColor,
+        seed: 2000,
+        intensity: 'medium',
+        type: 'button'
+      });
+      
+      const darkSVG = generateWatercolorSVG({
+        width: size.width,
+        height: size.height,
+        color: theme.darkColor,
+        seed: 2000,
+        intensity: 'medium',
+        type: 'button'
+      });
+      
+      const componentCode = generateButtonComponentCode(componentName, lightSVG, darkSVG, size.width, size.height);
+      const filePath = path.join(outputDir, `${componentName}.tsx`);
+      fs.writeFileSync(filePath, componentCode);
+      console.log(`✅ Generated: ${componentName}.tsx`);
+    });
   });
   
   // Generate different intensities for Purple theme
