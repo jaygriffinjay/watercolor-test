@@ -4,8 +4,6 @@ A comprehensive watercolor effect system for React with an **interactive playgro
 
 ## ✨ Interactive Playground
 
-🚀 **[Try the Live Playground](/playground)** - The star feature of this project!
-
 The playground lets you experiment with watercolor effects in real-time:
 - 🎛️ **Real-time controls** - Adjust width, height, color, and intensity with sliders
 - 🌈 **Color palette picker** - Choose from 8 beautiful preset colors
