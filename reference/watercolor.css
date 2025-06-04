@@ -1,0 +1,242 @@
+:root {
+    /* vars */
+    --shadow: 4px;
+    --hue: 0deg;
+    --sat: 100%;
+}
+
+
+button {
+    font-size: 1.25rem;
+    position: relative;
+    color: white;
+    isolation: isolate;
+    border: none!important;
+    outline: none!important;
+    box-shadow: none!important;
+    text-shadow: 0 1px 5px rgb(0 0 0 / 33%);
+    background: transparent;
+    opacity: 1!important;
+    padding: 0.75em 2em;
+    border-radius: 10px;
+    mix-blend-mode: multiply;
+    &:active {
+        translate: 0px calc(var(--shadow)/2);
+    }
+    &:before {
+        content: "";
+        inset: 0;
+        position: absolute;
+        border-radius: inherit;
+        background:  rgb(0 0 0 / 100%);
+        filter: url(#watercolor) drop-shadow(0 0em 0em rgba(255,255,255,1)) sepia(1) brightness(var(--bri,1)) contrast(var(--con,0.75)) saturate(var(--sat)) hue-rotate(var(--hue)) drop-shadow(0 var(--shadow) 0.25px rgba(0,0,0,0.25)) ;
+        translate: -1px -1px;
+        opacity: 0.9;
+        box-shadow: 0 0 0px 0px black;
+        transition: all 0.25s ease-out;
+        z-index: -1;
+    }
+    &:hover:before {
+        opacity: 1;
+        box-shadow: 0 0 0px 2px black;
+    }
+    &:active:before {
+        --shadow: 2px;
+        opacity: 1;
+    }
+    &.primary {
+        --bri: 0.4;
+        color: white;
+    }
+    &.secondary {
+        --sat: 170%;
+        --bri: 1.6;
+        --con: 2;
+        color: #392b17;
+        border-radius: 100vw;
+    }
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.card {
+    --hue: 240deg;
+    --sat: 130%;
+    --con: 1.7;
+    --bri: 1.4;
+    position: relative;
+    display: flex;
+    isolation: isolate;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5em 2em;
+    color: #392b17cc;
+    font-size: 1.33rem;
+        border-radius: 20px;
+        mix-blend-mode: multiply;
+    &:before {
+        content: "";
+        inset: 0;
+        position: absolute;
+        border-radius: inherit;
+        background:  rgb(0 0 0 / 100%);
+        filter: url(#watercolor) drop-shadow(0 0em 0em rgba(255,255,255,1)) sepia(1) brightness(var(--bri,1.8)) contrast(var(--con,1)) saturate(var(--sat)) hue-rotate(var(--hue));
+        translate: -1px -1px;
+        opacity: 0.9;
+        box-shadow: 0 0 0px 0px black;
+        transition: all 0.25s ease-out;
+        z-index: -1;
+    }   
+    
+    h2 {
+        text-transform: uppercase;
+        font-size: 3rem;
+    }
+    
+    &:nth-child(2) {
+        --hue: 190deg;
+        --sat: 400%;
+        --con: 1.9;
+        --bri: 1.4;
+    }
+    
+    &:nth-child(3) {
+        --hue: 150deg;
+        --sat: 180%;
+        --con: 2;
+        --bri: 1.4;
+    }
+    
+    &:nth-child(4) {
+        --hue: 90deg;
+        --sat: 110%;
+        --con: 1.9;
+        --bri: 1.4;
+    }
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    margin-block: 2rem;
+}
+.blot {
+    
+    padding: 0.5em 0.75em;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    isolation: isolate;
+    position: relative;
+    border-radius: 5px;
+    overflow: visible;
+    text-align: left;
+    mask-image: linear-gradient(to right, black calc(100% - 5rem), transparent calc(100% - 0.5rem) );
+    
+    &:before {    
+        --hue: 290deg;
+        --sat: 100%;
+        --con: 1;
+        --bri: 1.5;
+        content: "";
+        inset: 1px;
+        position: absolute;
+        border-radius: inherit;
+        background:  rgb(0 0 0 / 100%);
+        filter: url(#watercolor2) drop-shadow(0 0em 0em rgba(200,200,200,1)) sepia(1) brightness(var(--bri,1.8)) contrast(var(--con,1)) saturate(var(--sat)) hue-rotate(var(--hue));
+        translate: -1px -1px;
+        opacity: 0;
+        box-shadow: 0 0 0px 0px black;
+        transition: all 0.25s ease-out;
+        z-index: -1;
+    }
+    
+    &:nth-child(1):before {
+        --hue: 0deg;
+        opacity: 0.8;
+    }
+    &:hover:before {
+        opacity: 0.8;
+        --hue: 290deg;
+    }
+}
+
+
+hr {
+    display: block;
+    height: 3px;
+    background:  rgb(0 0 0 / 100%);
+    width: 100%;
+    border-radius: 100vw;
+    filter: url(#watercolor2) drop-shadow(0 0em 0em rgba(200,200,200,1)) sepia(1) brightness(1.25) contrast(1.25) saturate(1.5);
+    translate: -1px -1px;
+    opacity: 0.75;
+}
+
+
+body, button, input, optgroup, select, textarea {
+    font-family: duper, sans-serif;
+    letter-spacing: 0.05em;
+    color: #392b17dd;
+}
+
+h1,h2,h3,h4,h5 {
+    font-family: "sketchnote-text", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    margin: 0;
+    text-shadow: inherit;
+    color: inherit;
+    
+}
+p {
+    margin: 0;
+}
+
+html,body { 
+    background: #fff0cb;
+    background: linear-gradient(#fff0cb,#fff0cb),url(https://www.toptal.com/designers/subtlepatterns/uploads/seamless_paper_texture.png);
+    background-blend-mode: multiply;
+    place-content: center;
+    min-height: 100%;
+    display: grid;
+}
+
+.form {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 800px;
+    margin: auto;
+}
+
+a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+strike {
+    opacity: 0.66;
+    text-decoration: none;
+    position: relative;
+    &:before {
+        content: "";
+        position: absolute;
+        left: -2px;
+        right: -2px;
+        top: 50%;
+        height: 0.15em;
+        background: #392b17ff;
+        rotate: 3deg;
+        border-radius: 100vw;
+        filter: url(#watercolor2) drop-shadow(0 0em 0em rgba(200,200,200,1)) sepia(1) brightness(0.1) contrast(1.5) saturate(2);
+        translate: -1px -1px;
+    }
+}
