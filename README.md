@@ -58,21 +58,31 @@ src/
 │   │   └── ... (7 more themes)
 │   ├── EnhancedWatercolorDivider.tsx    # Dynamic playground component
 │   ├── WatercolorPlayground.tsx         # Interactive demo interface
-│   ├── WatercolorPNGButton.tsx          # PNG asset-based buttons (NEW!)
+│   ├── WatercolorPNGButton.tsx          # PNG asset-based buttons
+│   ├── WatercolorButton.tsx             # Simplified dynamic buttons (NEW!)
+│   ├── WatercolorTest.tsx               # Comprehensive test page (NEW!)
+│   ├── CompressedWatercolorAssets.tsx   # Compressed PNG showcase (NEW!)
 │   ├── WatercolorBorder.tsx             # Watercolor border wrapper
 │   ├── WatercolorBorderImage.tsx        # CSS border-image implementation
-│   ├── WatercolorButton.tsx             # Dynamic button components
 │   ├── WatercolorCard.tsx               # Card components
 │   ├── WatercolorNavigation.tsx         # Navigation components
 │   ├── StaticWatercolorDivider.tsx      # PNG-based component
 │   └── SVGWatercolorDivider.tsx         # Programmatic SVG generator
 ├── utils/
 │   ├── watercolorFactory.ts             # Build-time generation system
-│   ├── rasterizeSVG.ts                  # Browser-based PNG export (NEW!)
+│   ├── rasterizeSVG.ts                  # Browser-based PNG export
 │   └── exportWatercolorAsset.ts         # PNG export utilities
 ├── scripts/
-│   └── generateWatercolorComponents.js  # Build script for themed components
+│   ├── generateWatercolorComponents.js  # Build script for themed components
+│   └── compressPNGs.cjs                 # PNG compression pipeline (NEW!)
 └── assets/
+    ├── high-res/                        # High-resolution source PNGs (NEW!)
+    │   ├── watercolor-button-100x100-2563eb-10x.png
+    │   └── watercolor-button-30x30-2563eb-10x.png
+    ├── compressed/                      # Optimized multi-scale assets (NEW!)
+    │   ├── watercolor-button-100x100-2563eb-1x-compressed.png
+    │   ├── watercolor-button-100x100-2563eb-2x-compressed.png
+    │   └── watercolor-button-100x100-2563eb-3x-compressed.png
     ├── paper-texture.webp               # Texture overlay
     ├── watercolor-button-50x50-2563eb-rasterized.png  # Example PNG asset
     └── purple line watercolor complete.png            # Exported watercolor asset
@@ -161,9 +171,134 @@ npm run generate:watercolor
 
 This creates new pre-rendered components in `src/components/generated/` with various themes and intensity levels.
 
+### PNG Compression Pipeline (NEW!)
+
+The project includes a production-ready PNG compression workflow for creating optimized watercolor assets:
+
+#### Quick Start:
+```bash
+# Generate compressed PNG assets
+npm run compress:png
+```
+
+#### How It Works:
+
+1. **Place 10x Resolution PNGs** in `src/assets/high-res/`
+   - Use descriptive filenames: `watercolor-button-100x100-blue-10x.png`
+   - These should be your highest quality source images
+
+2. **Run Compression Script**
+   ```bash
+   npm run compress:png
+   ```
+
+3. **Get Optimized Assets** in `src/assets/compressed/`
+   - Automatically generates 1x, 2x, 3x versions
+   - Removes ghost pixels around watercolor edges
+   - Optimized for web delivery
+
+#### Ghost Pixel Removal Algorithm:
+
+The compressor intelligently removes unwanted light pixels around watercolor edges:
+
+```javascript
+// Targets light blue pixels with low alpha (ghost pixels)
+const lightPixelThreshold = 175;  // Blue channel > 175
+const lowAlphaThreshold = 75;     // Alpha < 75
+
+// Only removes pixels that are both:
+// 1. Light colored (B > 175)
+// 2. Semi-transparent (A < 75)
+// 3. Not fully transparent (A > 0)
+```
+
+**Why This Works:**
+- ✅ **Preserves watercolor pigments** - Solid colors have lower blue values and higher alpha
+- ✅ **Removes artifact pixels** - Light blue pixels with low opacity are unwanted edge artifacts  
+- ✅ **Maintains transparency** - Keeps existing transparent areas intact
+- ✅ **Clean edges** - Results in crisp watercolor boundaries without boxy artifacts
+
+#### File Structure:
+```
+src/assets/
+├── high-res/           # Place your 10x source PNGs here
+│   ├── watercolor-button-100x100-blue-10x.png
+│   └── watercolor-divider-800x4-purple-10x.png
+└── compressed/         # Generated optimized assets
+    ├── watercolor-button-100x100-blue-1x-compressed.png
+    ├── watercolor-button-100x100-blue-2x-compressed.png
+    ├── watercolor-button-100x100-blue-3x-compressed.png
+    └── ...
+```
+
+#### Usage in Production:
+```tsx
+import { WatercolorPNGButton } from './components/WatercolorPNGButton';
+
+// Use compressed assets for optimal performance
+<WatercolorPNGButton
+  pngPath="/assets/compressed/watercolor-button-100x100-blue-2x-compressed.png"
+  width={100}
+  height={100}
+>
+  Click Me
+</WatercolorPNGButton>
+```
+
+### Simplified Watercolor Components (NEW!)
+
+For development speed and better performance, we now have simplified watercolor components:
+
+#### Features:
+- **6 SVG operations** instead of 20+ (much faster rendering)
+- **Proper text centering** - Fixed positioning issues
+- **Dynamic sizing & colors** - Any size, any color, instantly
+- **Three intensity levels** - light, medium, heavy
+- **Interactive states** - hover, click, disabled
+
+#### Test Page:
+Visit `/test` to see comprehensive examples of:
+- Different button sizes (small, medium, large, square)
+- Color variations (blue, purple, green, orange, pink, dark)
+- Intensity levels (light, medium, heavy watercolor effects)
+- Interactive states (normal, disabled)
+- Real-world usage examples
+
+#### Simplified Watercolor Button:
+```tsx
+import { WatercolorButton } from './components/WatercolorButton';
+
+function App() {
+  return (
+    <WatercolorButton
+      width={120}
+      height={40}
+      color="#8b5cf6"
+      intensity="medium"
+      onClick={() => alert('Clicked!')}
+    >
+      Click Me
+    </WatercolorButton>
+  );
+}
+```
+
 ## 🎯 Component Props
 
-### WatercolorPNGButton (NEW!)
+### WatercolorButton (Simplified, NEW!)
+```tsx
+interface WatercolorButtonProps {
+  children: React.ReactNode;                    // Button content
+  width?: number;                               // Default: 120
+  height?: number;                              // Default: 40
+  color?: string;                              // Default: '#2563eb'
+  intensity?: 'light' | 'medium' | 'heavy';   // Default: 'medium'
+  onClick?: () => void;                        // Click handler
+  disabled?: boolean;                          // Default: false
+}
+```
+
+### WatercolorPNGButton (Production-Ready)
 ```tsx
 interface WatercolorPNGButtonProps {
   pngPath: string;          // Path to PNG asset
@@ -222,6 +357,7 @@ The project now includes a complete workflow for creating production-ready PNG b
 
 - **`/`** - Complete component demo showcase
 - **`/playground`** - Interactive watercolor playground
+- **`/test`** - Simplified components test page (NEW!)
 
 ## 🙏 Credits
 
