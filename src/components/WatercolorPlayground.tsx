@@ -5,6 +5,7 @@ import { WatercolorBorder } from './WatercolorBorder';
 import { WatercolorBorderImage } from './WatercolorBorderImage';
 import { WatercolorButton } from './WatercolorButton';
 import { WatercolorPNGButton } from './WatercolorPNGButton';
+import { CompressedWatercolorAssets } from './CompressedWatercolorAssets';
 import { rasterizeSVG, downloadPNG } from '../utils/rasterizeSVG';
 import { 
   WatercolorButtonBlueSmall,
@@ -140,6 +141,7 @@ export const WatercolorPlayground: React.FC = () => {
   const [hoverable, setHoverable] = useState(false);
   const [seed, setSeed] = useState(1234);
   const [borderFrame, setBorderFrame] = useState(false);
+  const [pngScale, setPngScale] = useState(6);
   
   const svgRef = useRef<HTMLDivElement>(null);
   
@@ -183,8 +185,8 @@ export const WatercolorPlayground: React.FC = () => {
       if (svgElement) {
         try {
           const svgString = svgElement.outerHTML;
-          const dataURL = await rasterizeSVG(svgString, width, height, 3); // 3x scale
-          downloadPNG(dataURL, `watercolor-button-${width}x${height}-${color.slice(1)}-rasterized.png`);
+          const dataURL = await rasterizeSVG(svgString, width, height, pngScale);
+          downloadPNG(dataURL, `watercolor-button-${width}x${height}-${color.slice(1)}-${pngScale}x.png`);
         } catch (error) {
           console.error('Rasterization failed:', error);
           alert('Failed to rasterize SVG. Check console for details.');
@@ -236,6 +238,17 @@ export const WatercolorPlayground: React.FC = () => {
           <ControlGroup>
             <Label>Seed: {seed}</Label>
             <Button onClick={generateRandomSeed}>Random Pattern</Button>
+          </ControlGroup>
+          
+          <ControlGroup>
+            <Label>PNG Scale: {pngScale}x</Label>
+            <Input 
+              type="range" 
+              min="2" 
+              max="10" 
+              value={pngScale} 
+              onChange={e => setPngScale(Number(e.target.value))} 
+            />
           </ControlGroup>
           
           <ControlGroup>
@@ -303,11 +316,16 @@ export const WatercolorPlayground: React.FC = () => {
         <ExportSection>
           <h4 style={{ margin: '0 0 0.5rem 0', color: '#065f46' }}>🔽 Export Current Design</h4>
           <p style={{ margin: '0 0 1rem 0', fontSize: '14px', color: '#047857' }}>
-            Download the current watercolor design as an SVG file for use with CSS border-image or other projects.
+            Download the current watercolor design as SVG or high-resolution PNG for use in your projects.
           </p>
-          <ExportButton onClick={exportSVG}>
-            Download SVG ({width}×{height})
-          </ExportButton>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <ExportButton onClick={exportSVG}>
+              📄 Download SVG ({width}×{height})
+            </ExportButton>
+            <ExportButton onClick={rasterizeButton} style={{ background: '#7c3aed' }}>
+              🖼️ Download PNG ({width * pngScale}×{height * pngScale})
+            </ExportButton>
+          </div>
         </ExportSection>
       </Section>
       
@@ -643,6 +661,27 @@ export const WatercolorPlayground: React.FC = () => {
           <br />
           <code style={{ background: '#d1fae5', padding: '2px 4px', borderRadius: '2px', fontSize: '12px' }}>
             &lt;WatercolorPNGButton pngPath="/assets/button.png" width=&#123;120&#125; height=&#123;40&#125;&gt;
+          </code>
+        </div>
+      </Section>
+      
+      <Section>
+        <SectionTitle>⚡ Ultra-High Quality Compressed Assets</SectionTitle>
+        <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+          These assets were exported at 10× resolution and compressed using Sharp for perfect quality at multiple scales.
+        </p>
+        
+        <CompressedWatercolorAssets 
+          onClick={(assetType, scale) => 
+            console.log(`Clicked ${assetType} at ${scale}× scale`)
+          }
+        />
+        
+        <div style={{ marginTop: '1rem', padding: '1rem', background: '#fef3c7', borderRadius: '6px' }}>
+          <strong>🎯 Workflow:</strong> Export at 10× → Compress with Sharp → Perfect quality at any scale!
+          <br />
+          <code style={{ background: '#fcd34d', padding: '2px 4px', borderRadius: '2px', fontSize: '12px' }}>
+            npm run compress:png
           </code>
         </div>
       </Section>

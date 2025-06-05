@@ -3,6 +3,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { WatercolorDemo } from './WatercolorDemo';
 import { WatercolorPlayground } from './components/WatercolorPlayground';
+import { WatercolorTest } from './components/WatercolorTest';
 
 const Navigation = styled.nav`
   background: #f8fafc;
@@ -62,6 +63,9 @@ function App() {
             <NavLink to="/playground" $isActive={location.pathname === '/playground'}>
               Interactive Playground
             </NavLink>
+            <NavLink to="/test" $isActive={location.pathname === '/test'}>
+              Simplified Test
+            </NavLink>
           </NavLinks>
         </NavContainer>
       </Navigation>
@@ -69,6 +73,7 @@ function App() {
       <Routes>
         <Route path="/" element={<WatercolorDemo />} />
         <Route path="/playground" element={<WatercolorPlayground />} />
+        <Route path="/test" element={<WatercolorTest />} />
       </Routes>
     </>
   );

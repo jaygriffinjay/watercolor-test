@@ -152,7 +152,7 @@ export const EnhancedWatercolorDivider: React.FC<WatercolorDividerProps> = ({
           y="0" 
           width={width} 
           height={height} 
-          rx={height <= 10 ? height/2 : Math.min(4, height * 0.1)} 
+          rx={height <= 10 ? height/2 : Math.min(width, height) * 0.25} 
           fill={borderFrame ? 'none' : color}
           stroke={borderFrame ? color : 'none'}
           strokeWidth={borderFrame ? Math.min(width, height) * 0.15 : 0}

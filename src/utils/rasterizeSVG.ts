@@ -2,7 +2,7 @@ export const rasterizeSVG = (
   svgString: string, 
   width: number, 
   height: number,
-  scale: number = 3
+  scale: number = 6
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     // Create a canvas with scaled dimensions

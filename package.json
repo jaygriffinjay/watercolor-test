@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate:watercolor": "node scripts/generateWatercolorComponents.js"
+    "generate:watercolor": "node scripts/generateWatercolorComponents.js",
+    "compress:png": "node scripts/compressPNGs.cjs"
   },
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",
@@ -16,6 +17,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
+    "sharp": "^0.34.2",
     "styled-components": "^6.1.18"
   },
   "devDependencies": {
